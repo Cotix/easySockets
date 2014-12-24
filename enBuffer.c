@@ -24,7 +24,11 @@ int enBufferRead(struct enBuffer* buff, void * data, unsigned int maxLength){
 	return maxLength;
 }
 void enBufferRealloc(struct enBuffer* buff, unsigned int size){
-	buff->data = realloc(buff->data, buff->ptr + size);
+	buff->data = realloc(buff->data, size);
+	buff->len = size;
+	if(buff->ptr > size){
+		buff->ptr = size;
+	}
 }
 int enBufferSeek(struct enBuffer* buff, unsigned int pos){
 	return buff->ptr = (buff->len > pos) ? pos : 0;
@@ -32,4 +36,8 @@ int enBufferSeek(struct enBuffer* buff, unsigned int pos){
 void enBufferFree(struct enBuffer* buff){
 	free(buff->data);
 	free(buff);
+}
+void enBufferSizeUp(struct enBuffer* buff, unsigned int size){
+	buff->data = realloc(buff->data, buff->len + size);
+	buff->len += size;
 }

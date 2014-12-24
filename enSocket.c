@@ -1,19 +1,61 @@
 #include "enSocket.h"
-struct enSocket* enTCPConnect(char* ip, unsigned short port){
-	struct enSocket socket = malloc(sizeof(enSocket));
-	struct sockaddr_in myAddr;
-	socket->sock = socket(AF_INET, SOCKET_STREAM, 0);
-	myAddr.sin_family = AF_INET;
-	myAddr.sin_port = htons(port);
-	myAddr.sin_addr.s_addr = inet_addr(ip);
-	if(connect(socket->sock, (struct sockaddr*)&myAddr, sizeof(struct sockaddr))){
-		return socket;
-	}else{
-		close(socket->sock);
-		free(socket);
-		return 0;
+void enInit(unsigned short port){
+	if((enUDPSocketOut = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
+		die("Couldn't make global udp socket");
 	}
 }
-struct enSocket* enTCPListen(unsigned short port);
-void enSend(struct enSocket* socket, struct enBuffer* buff);
-void enSendSized(struct enSocket* socket, struct enBuffer* buff, unsigned int size);
+int enSend(char* ip, unsigned short port, struct enBuffer* buff){
+	if(buff->ptr == 0){
+		return 0;
+	}
+	struct sockaddr_in addr;
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);
+	addr.sin_addr.s_addr = inet_addr(ip);
+	sendto(enUDPSocketOut, buff->data, buff->ptr, (struct sockaddr*)&addr, sizeof(addr));
+	return buff->ptr;
+}
+int enSendSized(char* ip, unsigned short port, struct enBuffer* buff, unsigned int size){
+	if(buff->ptr == 0 || size == 0){
+		return 0;
+	}
+	struct sockaddr_in addr;
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);
+	addr.sin_addr.s_addr = inet_addr(ip);
+	if(size > buff->ptr){
+		size = buff->ptr;
+	}
+	void* start = buff->data + buff->ptr - size;
+	sendto(enUDPSocketOut, start, size, (struct sockaddr*)&addr, sizeof(addr));
+	return size;
+}
+int enUDPListen(unsigned short port){
+	int sock;
+	if((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
+		return -1;
+	}
+	struct sockaddr_in addr;
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);
+	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	if(bind(sock, &addr, sizeof(addr)) == -1){
+		close(sock);
+		return -1;
+	}
+	return sock;
+}
+int enUDPRecv(int sock, struct enBuffer* buff, unsigned int *ip){
+	struct sockaddr_in addr;
+	int maxBuffer = (buff->len - buff->ptr);
+	int recvd = 0;
+	while((recvd = recvfrom(sock, buff->data+buff->ptr, maxBuffer, MSG_PEEK, &addr, sizeof(addr))) >= maxBuffer){
+		maxBuffer <<= 1;
+		enBufferSizeUp(buff, maxBuffer);
+		maxBuffer = (buff->len - buff->ptr);
+	}
+	return recvfrom(sock, buff->data+buff->ptr, maxBuffer, 0, &addr, sizeof(addr));
+}
+void enClose(){
+	close(enUDPSocketOut);
+}

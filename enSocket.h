@@ -3,15 +3,12 @@
 #include "enBuffer.h"
 #include <sys/socket.h>
 
-struct enSocket{
-	int sock;
+int enUDPSocketOut;
 
-};
-
-struct enSocket* enTCPConnect(char* ip, unsigned short port);
-struct enSocket* enTCPListen(unsigned short port);
-void enSend(struct enSocket* socket, struct enBuffer* buff);
-void enSendSized(struct enSocket* socket, struct enBuffer* buff, unsigned int size);
-
+void enInit(unsigned short port);
+int enSend(char* ip, unsigned short port, struct enBuffer* buff);
+int enSendSized(char* ip, unsigned short port, struct enBuffer* buff, unsigned int size);
+struct enSocket* enUDPListen(unsigned short port);
+void enClose();
 
 #endif
