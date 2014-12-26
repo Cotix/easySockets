@@ -2,6 +2,9 @@
 #define ENSOCKET_HEADER
 #include "enBuffer.h"
 #include <sys/socket.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <netinet/in.h>
 
 int enUDPSocketOut;
 

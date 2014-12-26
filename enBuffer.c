@@ -11,6 +11,7 @@ struct enBuffer* enBufferCreate(unsigned int length){
 void enBufferWrite(struct enBuffer* buff, void * data, unsigned int length){
 	if((buff->len - buff->ptr) < length){
 		buff->data = realloc(buff->data, buff->ptr + length);
+		buff->len = buff->ptr + length;
 	}
 	buff->ptr += length;
 	memcpy(buff->data + buff->ptr, data, length);
