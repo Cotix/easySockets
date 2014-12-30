@@ -1,6 +1,6 @@
 #include "enSocket.h"
 #include <stdio.h>
-void enInit(unsigned short port){
+void enInit(){
 	if((enUDPSocketOut = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
 		printf("Couldn't make global udp socket");
 	}

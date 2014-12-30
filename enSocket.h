@@ -8,7 +8,7 @@
 
 int enUDPSocketOut;
 
-void enInit(unsigned short port);
+void enInit();
 int enSend(char* ip, unsigned short port, struct enBuffer* buff);
 int enSendSized(char* ip, unsigned short port, struct enBuffer* buff, unsigned int size);
 int enUDPListen(unsigned short port);
