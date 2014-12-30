@@ -1,8 +1,16 @@
 #include "enSocket.h"
 #include <stdio.h>
-void enInit(){
+void enInit(unsigned short port){
 	if((enUDPSocketOut = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
 		printf("Couldn't make global udp socket");
+	}
+	struct sockaddr_in addr;
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);
+	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	if(bind(enUDPSocketOut, (struct sockaddr *) &addr, sizeof(addr)) == -1){
+		close(sock);
+		printf("Couldn't listen on %u\n", port)
 	}
 }
 int enSend(char* ip, unsigned short port, struct enBuffer* buff){
